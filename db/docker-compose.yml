@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mongodb_container:
+    container_name: sky-mongo
+    image: mongo:5.0.3
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_DATABASE: sky
+      MONGODB_USERNAME: user
+      MONGODB_PASSWORD: password
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - mongodb_data_container:/data/db
+
+volumes:
+  mongodb_data_container:
