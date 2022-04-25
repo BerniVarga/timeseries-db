@@ -2,10 +2,9 @@
 
 ## Code structure
 The code consist of 3 components:
-* db - responsible for running a DB for storing the timeseries data
-* ingestion - a script that is run over the DB (in the docker container)
+* db - contains a docker compose setup for running a MongoDB instance, that will stores the timeseries data
+* ingestion - a script that is run over the DB (ingestion is run from within the docker container, after the file is copied over)
 * api - an api that allows querying the data for specific time ranges and aggregations by frequency period
-
 
 ## How to run it
 
@@ -58,16 +57,16 @@ Returns all the saved concurency metrics within the given time range, with aggre
 ## Future TODO list/known limitation:
 
 DB level:
-- Authentication to Mongo needs to be hidden/secrets
+- Authentication to Mongo should use secrets
 - Authentication for the script executer needs to be set up
 
 API level TODOs:
 * change the Logging - use Logger
-* revise parameters - https server, mongo client
+* revise parameters - http server, mongo client
 * extend query methods with more aggregation; query for a day (without using the range)
-* Mongo - stream data from Mongo; read into a channel and stream it to the client
-* write more tests
-* adding a health endpoint
+* Mongo - data from Mongo; read into a channel and considering streaming it to the client or offer pagination
+* write more tests (cover more testcases, and add tests for the handler repo)
+* add a health endpoint
 
 Ingestion Level:
 * create a cron job
