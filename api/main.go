@@ -86,8 +86,6 @@ func run(ctx context.Context, store handler.Store) error {
 	case err := <-errCh:
 		return err
 	}
-
-	return nil
 }
 
 func createRouter(store handler.Store) *mux.Router {

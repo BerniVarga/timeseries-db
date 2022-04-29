@@ -8,7 +8,7 @@ The code consist of 3 components:
 
 ## How to run it
 
-Each module describes the running instractions needed, but in order for you to run the code, you need:
+Each module describes the running instructions needed, but in order for you to run the code, you need:
 * Golang installed (>1.7)
 * Docker installed
 * bash shell

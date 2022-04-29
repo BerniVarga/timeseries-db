@@ -73,13 +73,13 @@ func (m *MongoStorage) GetSeries(ctx context.Context, config model.Query) ([]mod
 
 	filter := bson.D{primitive.E{Key: "timestamp", Value: primitive.M{"$lte": config.EndAt, "$gte": config.StartAt}}}
 	findOptions := options.Find()
-	findOptions.SetSort(bson.D{primitive.E{"timestamp", 1}}) // ordering - for display it is kept from old to new
+	findOptions.SetSort(bson.D{primitive.E{Key: "timestamp", Value: 1}}) // ordering - for display it is kept from old to new
 
 	switch config.MetricType {
 	case model.MetricTypeConcurrency:
-		findOptions.SetProjection(bson.D{primitive.E{"cpu_load", 0}})
+		findOptions.SetProjection(bson.D{primitive.E{Key: "cpu_load", Value: 0}})
 	case model.MetricTypeCPULoad:
-		findOptions.SetProjection(bson.D{primitive.E{"concurrency", 0}})
+		findOptions.SetProjection(bson.D{primitive.E{Key: "concurrency", Value: 0}})
 	}
 
 	var results []model.Metric
@@ -103,7 +103,7 @@ func (m *MongoStorage) GetSeries(ctx context.Context, config model.Query) ([]mod
 // it considers the frequency field: in case the data range is in second, it can return averages in minutes, hours or other aggregations
 func (m *MongoStorage) getSeriesByFrequency(ctx context.Context, config model.Query) ([]model.Metric, error) {
 	matchStage := bson.D{
-		primitive.E{"$match", bson.D{
+		primitive.E{Key: "$match", Value: bson.D{
 			primitive.E{Key: "timestamp", Value: primitive.M{"$lte": config.EndAt, "$gte": config.StartAt}},
 		}},
 	}
@@ -125,27 +125,27 @@ func (m *MongoStorage) getSeriesByFrequency(ctx context.Context, config model.Qu
 	var groupStage bson.D
 	switch config.MetricType {
 	case model.MetricTypeConcurrency:
-		groupStage = bson.D{primitive.E{"$group",
-			bson.D{primitive.E{"_id", bson.D{
+		groupStage = bson.D{primitive.E{Key: "$group",
+			Value: bson.D{primitive.E{Key: "_id", Value: bson.D{
 				primitive.E{Key: "frequency", Value: bson.D{
-					primitive.E{"$dateTrunc", primitive.M{"date": "$timestamp", "unit": frequency}}}}}},
-				primitive.E{"concurrency", bson.D{primitive.E{"$avg", "$concurrency"}}}}}}
+					primitive.E{Key: "$dateTrunc", Value: primitive.M{"date": "$timestamp", "unit": frequency}}}}}},
+				primitive.E{Key: "concurrency", Value: bson.D{primitive.E{Key: "$avg", Value: "$concurrency"}}}}}}
 	case model.MetricTypeCPULoad:
-		groupStage = bson.D{primitive.E{"$group",
-			bson.D{primitive.E{"_id", bson.D{
+		groupStage = bson.D{primitive.E{Key: "$group",
+			Value: bson.D{primitive.E{Key: "_id", Value: bson.D{
 				primitive.E{Key: "frequency", Value: bson.D{
-					primitive.E{"$dateTrunc", primitive.M{"date": "$timestamp", "unit": frequency}}}}}},
-				primitive.E{"cpu_load", bson.D{primitive.E{"$avg", "$cpu_load"}}}}}}
+					primitive.E{Key: "$dateTrunc", Value: primitive.M{"date": "$timestamp", "unit": frequency}}}}}},
+				primitive.E{Key: "cpu_load", Value: bson.D{primitive.E{Key: "$avg", Value: "$cpu_load"}}}}}}
 	default:
-		groupStage = bson.D{primitive.E{"$group",
-			bson.D{primitive.E{"_id", bson.D{
+		groupStage = bson.D{primitive.E{Key: "$group",
+			Value: bson.D{primitive.E{Key: "_id", Value: bson.D{
 				primitive.E{Key: "frequency", Value: bson.D{
-					primitive.E{"$dateTrunc", primitive.M{"date": "$timestamp", "unit": frequency}}}}}},
-				primitive.E{"cpu_load", bson.D{primitive.E{"$avg", "$cpu_load"}}},
-				primitive.E{"concurrency", bson.D{primitive.E{"$avg", "$concurrency"}}}}}}
+					primitive.E{Key: "$dateTrunc", Value: primitive.M{"date": "$timestamp", "unit": frequency}}}}}},
+				primitive.E{Key: "cpu_load", Value: bson.D{primitive.E{Key: "$avg", Value: "$cpu_load"}}},
+				primitive.E{Key: "concurrency", Value: bson.D{primitive.E{Key: "$avg", Value: "$concurrency"}}}}}}
 	}
 	var projectionStage bson.D = bson.D{
-		primitive.E{"$project", bson.D{
+		primitive.E{Key: "$project", Value: bson.D{
 			primitive.E{Key: "timestamp", Value: "$_id.frequency"},
 			primitive.E{Key: "cpu_load", Value: "$cpu_load"},
 			primitive.E{Key: "concurrency", Value: "$concurrency"},
@@ -175,7 +175,7 @@ func (m *MongoStorage) getSeriesByFrequency(ctx context.Context, config model.Qu
 // GetAverage - returns the average value of a metrics for a certain time range
 func (m *MongoStorage) GetAverage(ctx context.Context, config model.Query) (*model.MetricAverage, error) {
 	matchStage := bson.D{
-		primitive.E{"$match", bson.D{
+		primitive.E{Key: "$match", Value: bson.D{
 			primitive.E{Key: "timestamp", Value: primitive.M{"$lte": config.EndAt, "$gte": config.StartAt}},
 		}},
 	}
@@ -183,15 +183,15 @@ func (m *MongoStorage) GetAverage(ctx context.Context, config model.Query) (*mod
 	var groupStage bson.D
 	switch config.MetricType {
 	case model.MetricTypeConcurrency:
-		groupStage = bson.D{primitive.E{"$group", bson.D{primitive.E{"_id", ""},
-			primitive.E{"concurrency", bson.D{primitive.E{"$avg", "$concurrency"}}}}}}
+		groupStage = bson.D{primitive.E{Key: "$group", Value: bson.D{primitive.E{Key: "_id", Value: ""},
+			primitive.E{Key: "concurrency", Value: bson.D{primitive.E{Key: "$avg", Value: "$concurrency"}}}}}}
 	case model.MetricTypeCPULoad:
-		groupStage = bson.D{primitive.E{"$group", bson.D{primitive.E{"_id", ""},
-			primitive.E{"cpu_load", bson.D{primitive.E{"$avg", "$cpu_load"}}}}}}
+		groupStage = bson.D{primitive.E{Key: "$group", Value: bson.D{primitive.E{Key: "_id", Value: ""},
+			primitive.E{Key: "cpu_load", Value: bson.D{primitive.E{Key: "$avg", Value: "$cpu_load"}}}}}}
 	default:
-		groupStage = bson.D{primitive.E{"$group", bson.D{primitive.E{"_id", ""},
-			primitive.E{"cpu_load", bson.D{primitive.E{"$avg", "$cpu_load"}}},
-			primitive.E{"concurrency", bson.D{primitive.E{"$avg", "$concurrency"}}}}}}
+		groupStage = bson.D{primitive.E{Key: "$group", Value: bson.D{primitive.E{Key: "_id", Value: ""},
+			primitive.E{Key: "cpu_load", Value: bson.D{primitive.E{Key: "$avg", Value: "$cpu_load"}}},
+			primitive.E{Key: "concurrency", Value: bson.D{primitive.E{Key: "$avg", Value: "$concurrency"}}}}}}
 	}
 
 	opts := options.Aggregate().SetMaxTime(2 * time.Second)
